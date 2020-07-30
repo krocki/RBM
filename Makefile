@@ -22,9 +22,10 @@ OPENGL=1
 
 #CXX=g++
 CXX=g++
-INCLUDES=-I./src -I/usr/local/Cellar/openblas/0.2.18_2/include
-LFLAGS=-lopenblas -L/usr/local/Cellar/openblas/0.2.18_2/lib
-CFLAGS=-std=c++0x -w -O3 -mtune=native
+OPENBLAS=/opt/OpenBLAS
+INCLUDES=-I./src -I$(OPENBLAS)/include
+LFLAGS=-lopenblas -L$(OPENBLAS)/lib
+CFLAGS=-std=c++0x -w -O3 -mtune=native -mavx2 -mfma
 CUDAFLAGS = -m64 -ccbin gcc -DUSE_CUBLAS -DUSE_CURAND --use_fast_math
 
 CFLAGS := $(CFLAGS) -DDEFAULT_MAX_CORES=$(NPROCS)
