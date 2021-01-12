@@ -44,8 +44,8 @@ void test( void ) {
 	float h2_sum = .0f;
 	float time_per_iteration;
 	size_t record_interval = 1000;
-	size_t num_h0 = 100;
-	size_t batchsize = 16;
+	size_t num_h0 = 64;
+	size_t batchsize = 8;
 
 	if ( inputs.size() > 0 ) {
 

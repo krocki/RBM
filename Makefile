@@ -67,4 +67,4 @@ else
 endif
 
 all:
-	$(CXX) ./src/mnist.cc $(INCLUDES) $(CFLAGS) $(LFLAGS) -o mnist
+	$(CXX) ./src/mnist2.cc $(INCLUDES) $(CFLAGS) $(LFLAGS) -o mnist2

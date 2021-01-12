@@ -23,10 +23,13 @@
 int test(void) {
 
 	Timer t;
+	std::vector<Matrix<float>*> inputs =
+	    ImageImporter::importFromFile( "data/mnist/train-images-idx3-ubyte", 28, 28, 16 );
+
 	Matrix<float>* main_display;
 	float err_sum = .0f;
 	size_t record_interval = 10000;
-	size_t patch_size = 16;
+	size_t patch_size = 28;
 
 	RBM h0(patch_size * patch_size, 64, NTYPE::BINARY, NTYPE::BINARY, LTYPE::CD, DISPLAY_MODE::UNFLATTEN, 1);
 	Matrix<float> patch(patch_size, patch_size);
@@ -46,9 +49,11 @@ int test(void) {
 		if (!_pause) {
 
 			display_mutex.lock();
-			int n = MT19937::randint() % 94;
-			char c = (char)(n+32);
-			char2matrix_16x16(c, *(main_display));
+			int n = MT19937::randint() % inputs.size();
+      Matrix<float>::randsubmatrix( *( inputs[n] ), patch );
+      MATRIX_MEMCPY(main_display, &patch);
+      //char c = (char)(n+32);
+			//char2matrix_16x16(c, *(main_display));
 
 			MATRIX_MEMCPY(h0.v, main_display);
 

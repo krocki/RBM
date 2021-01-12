@@ -208,17 +208,17 @@ class RBM : public Encoder {
 
 	void compute_statistics() {
 
-		// MATRIX_MEMCPY(ve, vn);
-		// ve->elementwise_function_matrix(&_sub, *v);
-		// // ve->elementwise_function(&_square);
-		// // err = ve->sum();
-		// hsum = h->sum() / (batch_size * num_output);
-		// err = ve->norm();
-		// err *= err / batch_size;
+		 MATRIX_MEMCPY(ve, vn);
+		 ve->elementwise_function_matrix(&_sub, *v);
+		 // ve->elementwise_function(&_square);
+		 // err = ve->sum();
+		 hsum = h->sum() / (batch_size * num_output);
+		 err = ve->norm();
+		 err *= err / batch_size;
 
-		// MATRIX_MEMCPY(H2, h);
-		// H2->elementwise_function(&_H2);
-		// I = H2->sum() / (batch_size * num_output);
+		 MATRIX_MEMCPY(H2, h);
+		 H2->elementwise_function(&_H2);
+		 I = H2->sum() / (batch_size * num_output);
 
 	}
 
