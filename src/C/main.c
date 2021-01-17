@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
 
   /* h := w'x */
   mmul(&h, &w, &x, 1, 0);
+  mat_apply(&h, &h, logistic);
 
   mat_dump(&h, "h.bin");
   mat_dump(&w, "w.bin");

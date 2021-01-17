@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #define USE_BLAS 1
 #if USE_BLAS
@@ -138,6 +139,10 @@ float norm(int n, const float *a) {
   return sqrtf(r);
 }
 
+float logistic(float x) {
+  return 1. / (1. + expf(-x));
+}
+
 void mat_zero(mat *m) {
   int n = m->r * m->c;
   memset(m->data, 0, n * sizeof(float));
@@ -148,6 +153,7 @@ void mat_randf(mat *m) {
     m->data[i] = randf();
   }
 }
+
 void mat_randn(mat *m, float mean, float stddev) {
   for (int i=0; i<(m->r * m->c); i++) {
     m->data[i] = randn(mean, stddev);
@@ -157,6 +163,18 @@ void mat_randn(mat *m, float mean, float stddev) {
 float mat_norm(mat *m) { return norm(m->r * m->c, m->data); }
 float mat_min(mat *m)  { return min(m->r * m->c, m->data); }
 float mat_max(mat *m)  { return max(m->r * m->c, m->data); }
+
+void mat_apply(mat *out, mat *in, float (*func)(float)) {
+
+  int n_in = out->r * in->c;
+  int n_out = in->r * in->c;
+  assert(n_in == n_out);
+
+  for (int i=0; i<n_out; i++) {
+    out->data[i] = func(in->data[i]);
+  }
+
+}
 
 void dump_arr_f(int n, float *m, const char *fn) {
   FILE *f = fopen(fn, "wb");
