@@ -8,18 +8,24 @@ if __name__ == "__main__":
 
   np.set_printoptions(precision=3)
 
-  x = np.fromfile(open('x.bin'), dtype='float32')
-  w = np.fromfile(open('w.bin'), dtype='float32')
-  h = np.fromfile(open('h.bin'), dtype='float32')
+  # C-saved files
+  xC = np.fromfile(open('x.bin'), dtype='float32')
+  wC = np.fromfile(open('w.bin'), dtype='float32')
+  hC = np.fromfile(open('h.bin'), dtype='float32')
 
-  x = x.reshape(NX, NB)
-  w = w.reshape(NX, NH)
-  h = h.reshape(NH, NB)
+  xC = xC.reshape(NX, NB)
+  wC = wC.reshape(NX, NH)
+  hC = hC.reshape(NH, NB)
 
-  print('x'); print(x.shape); print(x)
-  print('w'); print(w.shape); print(w)
-  print('h'); print(h.shape); print(h)
+  w = wC.copy()
+  x = xC.copy()
 
-  h0 = np.dot(w.T, x)
+  print('xC'); print(xC.shape); print(xC)
+  print('wC'); print(wC.shape); print(wC)
+  print('hC'); print(hC.shape); print(hC)
 
-  print('h_py'); print(h0.shape); print(h0)
+  h = np.dot(w.T, x)
+
+  print('h_py'); print(h.shape); print(h)
+  print(f'norm(h-hC)={np.linalg.norm(h - hC)}')
+  print(f'maxdiff(h-hC)={np.max(np.fabs(h - hC))}')
