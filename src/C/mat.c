@@ -17,7 +17,7 @@ void mat_alloc(mat *m, int r, int c) {
   m->data = calloc(r * c, sizeof(float));
   m->r = r; m->c = c;
   m->n = r * c;
-  m->order = col_major;
+  m->order = row_major;
 }
 
 void mat_free(mat *m) {
@@ -36,7 +36,8 @@ int print_f(float *f) {
   }
 }
 
-void mat_print(mat *m) {
+/*
+   void mat_print(mat *m) {
   printf("===== %d %d %s =====\n",
   m->r, m->c,
   m->order == col_major ?
@@ -53,6 +54,34 @@ void mat_print(mat *m) {
     for (int i=0; i<m->c; i++) {
       nnz+=print_f(&(m->data[i*m->r+j]));
       if (i==(m->c-1)) {
+        printf("%s", nnz==0 ? "\r" : "\n");
+        nnz = 0;
+      }
+      else printf(" ");
+    }
+  }
+}
+*/
+void mat_print(mat *m) {
+
+  int r = m->order == col_major ? m->r : m->c;
+  int c = m->order == col_major ? m->c : m->r;
+
+  printf("===== %d %d %s =====\n",
+  r, c, m->order == col_major ?
+  "col_major" : "row_major");
+
+  printf(" ");
+  for (size_t i=0; i<r; i++)
+    printf("%6zu ", i);
+  printf("\n");
+
+  int nnz = 0;
+  for (size_t j=0; j<c; j++) {
+    printf("%2zu ", j);
+    for (int i=0; i<r; i++) {
+      nnz+=print_f(&(m->data[m->order == col_major ? i*r+j : j*r+i]));
+      if (i==(r-1)) {
         printf("%s", nnz==0 ? "\r" : "\n");
         nnz = 0;
       }
@@ -174,11 +203,11 @@ void mmul(
   float alpha = 1.f;
   float beta = 1.f;
 
-  int lda = transA ? K : M;
-  int ldb = transB ? N : K;
-  int ldc = M;
+  int lda = transA ? M : K;
+  int ldb = transB ? K : N;
+  int ldc = N;
 
-  cblas_sgemm( CblasColMajor, at, bt, M, N, K,
+  cblas_sgemm( c->order == col_major ? CblasColMajor : CblasRowMajor, at, bt, M, N, K,
                alpha,
                a->data, lda,
                b->data, ldb,
