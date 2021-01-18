@@ -26,7 +26,10 @@ if __name__ == "__main__":
   # positive
   h = np.dot(w.T, x)
   h = logistic(h)
+  posprods = np.dot(x, h.T)
+
 
   print('h_py'); print(h.shape); print(h)
   print(f'norm(h-hC)={np.linalg.norm(h - hC)}')
   print(f'maxdiff(h-hC)={np.max(np.fabs(h - hC))}')
+  print('posprods'); print(posprods.shape); print(posprods)
