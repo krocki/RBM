@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdarg.h>
 
 #define USE_BLAS 1
 #if USE_BLAS
@@ -22,8 +23,11 @@ void mat_alloc(mat *m, int r, int c) {
 }
 
 void mat_free(mat *m) {
+
+  assert(NULL != m); assert(NULL != m->data);
   free(m->data); m->data = NULL;
   m->r = 0; m->c = 0;
+
 }
 
 int print_f(float *f) {
@@ -69,7 +73,7 @@ void mat_print(mat *m) {
   int c = m->order == col_major ? m->c : m->r;
 
   printf("===== %d %d %s =====\n",
-  r, c, m->order == col_major ?
+  m->r, m->c, m->order == col_major ?
   "col_major" : "row_major");
 
   printf(" ");
@@ -141,6 +145,10 @@ float norm(int n, const float *a) {
 
 float logistic(float x) {
   return 1. / (1. + expf(-x));
+}
+
+float binarize(float x) {
+  return randf() < x ? 1.f : 0.f;
 }
 
 void mat_zero(mat *m) {
