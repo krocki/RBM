@@ -4,10 +4,13 @@ import matplotlib
 matplotlib.use('Agg')
 
 NX = 784
-NH = 4
-NB = 1
-sigma = 1e-3
-eta = 1e-6
+NH = 100
+D = int(np.sqrt(NH))
+
+NB = 8
+sigma = 1e-2
+eta = 1e-4
+decay = 1e-5
 smerr = None
 
 def np_debug_print(x):
@@ -44,6 +47,7 @@ def logistic(x):
 if __name__ == "__main__":
 
   np.set_printoptions(precision=3)
+  plt.ion()
 
   w = np.random.randn(NX, NH).astype('float32') * sigma
   data, _ = read_mnist();
@@ -52,8 +56,8 @@ if __name__ == "__main__":
 
   while True:
 
-    idx = np.random.randint(60000)
-    x = data[idx, :, np.newaxis]
+    idx = np.random.randint(60000-NB+1)
+    x = data[idx:idx+NB, :].T
 
     # positive
     h = np.dot(w.T, x)
@@ -72,15 +76,26 @@ if __name__ == "__main__":
     posprods = np.dot(x, h.T)
     negprods = np.dot(n, hn.T)
 
-    err = np.linalg.norm(x - n)
+    err = np.linalg.norm(x - n)/NB
     smerr = err if smerr is None else smerr * 0.99 + err * 0.01
 
-    if ii%1000 and ii>0:
-      print(f"{ii}: {smerr}")
-      im = x.reshape(28, 28)
-      np_save_img(im, f"im_{ii}_{smerr}.png")
+    if 0==ii%10000 and ii>0:
 
+      print(f"{ii}: {smerr}")
+
+      im_x = np.transpose(x.reshape(28, 28, NB), (0, 2, 1)).reshape(28, 28*NB)
+      im_n = np.transpose(n.reshape(28, 28, NB), (0, 2, 1)).reshape(28, 28*NB)
+      im_w = np.transpose(w.reshape(28, 28, D, D), (2, 0, 3, 1)).reshape(28*D, 28*D)
+      im = np.vstack((im_x, im_n))
+
+      np_save_img(im, f"im.png")
+      np_save_img(im_w, f"w.png")
+      np_save_img(np.transpose(h.reshape(D, D, NB), (2, 0, 1)).reshape(D*NB, D), f"h.png")
+      np_save_img(np.transpose(H.reshape(D, D, NB), (2, 0, 1)).reshape(D*NB, D), f"H.png")
+
+    # adjust w
     w_delta = (posprods - negprods)
+    w *= (1-decay)
     w += w_delta * eta
 
     ii += 1
