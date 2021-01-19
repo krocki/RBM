@@ -4,16 +4,17 @@ import matplotlib
 matplotlib.use('Agg')
 
 NX = 784
-NH = 64
+NH = 256
 D = int(np.sqrt(NH))
 
 NB = 8
 sigma = 1e-2
-eta = 1e-4
-decay = 1e-6
-momentum = .5
+eta = 1e-3
+decay = 1e-5
+momentum = .9
 smoothing = 1e-4
 smerr = None
+smact = None
 
 def np_debug_print(x):
 
@@ -52,10 +53,13 @@ if __name__ == "__main__":
   plt.ion()
 
   w = np.random.randn(NX, NH).astype(np.float32) * sigma
-  b = np.random.randn(NH, NB).astype(np.float32) * 0
-  c = np.random.randn(NX, NB).astype(np.float32) * 0
+  b = np.random.randn(NH, NB).astype(np.float32) * sigma
+  c = np.random.randn(NX, NB).astype(np.float32) * sigma
 
   dw = np.zeros_like(w)
+  db = np.zeros_like(b)
+  dc = np.zeros_like(c)
+
   data, _ = read_mnist();
 
   ii = 0
@@ -83,16 +87,26 @@ if __name__ == "__main__":
     posprods = np.dot(x, h.T)
     negprods = np.dot(n, hn.T)
 
+    poshidact = np.sum(h)
+    posvisact = np.sum(x)
+    neghidact = np.sum(hn)
+    negvisact = np.sum(n)
+
     err = np.sum(((x - n)**2)/NB)
+
     smerr = err if smerr is None else smerr * (1-smoothing) + err * smoothing
+    smact = poshidact if smact is None else smact * (1-smoothing) + poshidact * smoothing
 
     if 0==ii%10000 and ii>0:
 
-      print(f"{ii}: {smerr}")
+      print(f"{ii}: err={smerr:.3f} act={smact:.3f}")
 
       im_x = np.transpose(x.reshape(28, 28, NB), (0, 2, 1)).reshape(28, 28*NB)
       im_n = np.transpose(n.reshape(28, 28, NB), (0, 2, 1)).reshape(28, 28*NB)
-      im_w = np.transpose(w.reshape(28, 28, D, D), (2, 0, 3, 1)).reshape(28*D, 28*D)
+      w_ = w.copy()
+      w_nrm = np.linalg.norm(w_, axis=0, keepdims=True)
+      w_ /= w_nrm
+      im_w = np.transpose(w_.reshape(28, 28, D, D), (2, 0, 3, 1)).reshape(28*D, 28*D)
       im = np.vstack((im_x, im_n))
 
       np_save_img(im, f"im.png")
@@ -102,7 +116,11 @@ if __name__ == "__main__":
 
     # adjust w
     dw = momentum * dw + eta*(posprods - negprods)/NB
-    w *= (1 - decay)
-    w += dw
+    db = momentum * db + eta*(poshidact - neghidact)/NB
+    dc = momentum * dc + eta*(posvisact - negvisact)/NB
+
+    w = w * (1 - decay) + dw
+    b = b * (1 - decay) + db
+    c = c * (1 - decay) + dc
 
     ii += 1
