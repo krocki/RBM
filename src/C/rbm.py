@@ -4,13 +4,14 @@ import matplotlib
 matplotlib.use('Agg')
 
 NX = 784
-NH = 100
+NH = 256
 D = int(np.sqrt(NH))
 
-NB = 8
-sigma = 1e-2
-eta = 1e-4
-decay = 1e-5
+NB = 16
+sigma = 1e-3
+eta = 1e-3
+decay = 1e-4
+momentum = .9
 smerr = None
 
 def np_debug_print(x):
@@ -49,7 +50,8 @@ if __name__ == "__main__":
   np.set_printoptions(precision=3)
   plt.ion()
 
-  w = np.random.randn(NX, NH).astype('float32') * sigma
+  w = np.random.randn(NX, NH).astype(np.float32) * sigma
+  dw = np.zeros_like(w)
   data, _ = read_mnist();
 
   ii = 0
@@ -64,9 +66,9 @@ if __name__ == "__main__":
     h = logistic(h)
 
     # down
-    r = np.random.rand(NH, NB)
+    r = np.random.rand(NH, NB).astype(np.float32)
     H = (r < h).astype(np.float32)
-    n = np.dot(w, h)
+    n = np.dot(w, H)
 
     # up
     hn = np.dot(w.T, n)
@@ -94,8 +96,7 @@ if __name__ == "__main__":
       np_save_img(np.transpose(H.reshape(D, D, NB), (2, 0, 1)).reshape(D*NB, D), f"H.png")
 
     # adjust w
-    w_delta = (posprods - negprods)
-    w *= (1-decay)
-    w += w_delta * eta
+    dw = momentum * dw + eta*(posprods - negprods)/NB - decay*w
+    w += dw
 
     ii += 1
