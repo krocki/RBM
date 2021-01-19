@@ -4,14 +4,15 @@ import matplotlib
 matplotlib.use('Agg')
 
 NX = 784
-NH = 256
+NH = 64
 D = int(np.sqrt(NH))
 
-NB = 16
-sigma = 1e-3
-eta = 1e-3
-decay = 1e-4
-momentum = .9
+NB = 8
+sigma = 1e-2
+eta = 1e-4
+decay = 1e-6
+momentum = .5
+smoothing = 1e-4
 smerr = None
 
 def np_debug_print(x):
@@ -51,6 +52,9 @@ if __name__ == "__main__":
   plt.ion()
 
   w = np.random.randn(NX, NH).astype(np.float32) * sigma
+  b = np.random.randn(NH, NB).astype(np.float32) * 0
+  c = np.random.randn(NX, NB).astype(np.float32) * 0
+
   dw = np.zeros_like(w)
   data, _ = read_mnist();
 
@@ -61,25 +65,26 @@ if __name__ == "__main__":
     idx = np.random.randint(60000-NB+1)
     x = data[idx:idx+NB, :].T
 
-    # positive
-    h = np.dot(w.T, x)
+    # up
+    h = np.dot(w.T, x) + b
     h = logistic(h)
 
     # down
     r = np.random.rand(NH, NB).astype(np.float32)
     H = (r < h).astype(np.float32)
-    n = np.dot(w, H)
+    n = np.dot(w, H) + c
+    n = logistic(n)
 
     # up
-    hn = np.dot(w.T, n)
+    hn = np.dot(w.T, n) + b
     hn = logistic(hn)
 
     # change w
     posprods = np.dot(x, h.T)
     negprods = np.dot(n, hn.T)
 
-    err = np.linalg.norm(x - n)/NB
-    smerr = err if smerr is None else smerr * 0.99 + err * 0.01
+    err = np.sum(((x - n)**2)/NB)
+    smerr = err if smerr is None else smerr * (1-smoothing) + err * smoothing
 
     if 0==ii%10000 and ii>0:
 
@@ -96,7 +101,8 @@ if __name__ == "__main__":
       np_save_img(np.transpose(H.reshape(D, D, NB), (2, 0, 1)).reshape(D*NB, D), f"H.png")
 
     # adjust w
-    dw = momentum * dw + eta*(posprods - negprods)/NB - decay*w
+    dw = momentum * dw + eta*(posprods - negprods)/NB
+    w *= (1 - decay)
     w += dw
 
     ii += 1
