@@ -9,10 +9,10 @@ D = int(np.sqrt(NH))
 
 NB = 8
 sigma = 1e-2
-eta = 1e-3
-decay = 1e-5
+eta = 1e-2
+decay = 1e-4
 momentum = .9
-smoothing = 1e-4
+smoothing = 1e-3
 smerr = None
 smact = None
 
@@ -53,8 +53,8 @@ if __name__ == "__main__":
   plt.ion()
 
   w = np.random.randn(NX, NH).astype(np.float32) * sigma
-  b = np.random.randn(NH, NB).astype(np.float32) * 0
-  c = np.random.randn(NX, NB).astype(np.float32) * 0
+  b = np.zeros((NH, 1), dtype=np.float32)
+  c = np.zeros((NX, 1), dtype=np.float32)
 
   dw = np.zeros_like(w)
   db = np.zeros_like(b)
@@ -106,6 +106,7 @@ if __name__ == "__main__":
       w_ = w.copy()
       w_nrm = np.linalg.norm(w_, axis=0, keepdims=True)
       w_ /= w_nrm
+      w_nrm = np.linalg.norm(w_, axis=0, keepdims=True)
       im_w = np.transpose(w_.reshape(28, 28, D, D), (2, 0, 3, 1)).reshape(28*D, 28*D)
       im = np.vstack((im_x, im_n))
 
@@ -120,7 +121,7 @@ if __name__ == "__main__":
     dc = momentum * dc + eta*(posvisact - negvisact)/NB
 
     w = w * (1 - decay) + dw
-    #b = b * (1 - decay) + db
-    #c = c * (1 - decay) + dc
+    b = b * (1 - decay) + db
+    c = c * (1 - decay) + dc
 
     ii += 1
