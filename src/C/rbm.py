@@ -4,7 +4,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 NX = 784
-NH = 256
+NH = 64
 D = int(np.sqrt(NH))
 
 NB = 8
@@ -53,8 +53,8 @@ if __name__ == "__main__":
   plt.ion()
 
   w = np.random.randn(NX, NH).astype(np.float32) * sigma
-  b = np.random.randn(NH, NB).astype(np.float32) * sigma
-  c = np.random.randn(NX, NB).astype(np.float32) * sigma
+  b = np.random.randn(NH, NB).astype(np.float32) * 0
+  c = np.random.randn(NX, NB).astype(np.float32) * 0
 
   dw = np.zeros_like(w)
   db = np.zeros_like(b)
@@ -87,10 +87,10 @@ if __name__ == "__main__":
     posprods = np.dot(x, h.T)
     negprods = np.dot(n, hn.T)
 
-    poshidact = np.sum(h)
-    posvisact = np.sum(x)
-    neghidact = np.sum(hn)
-    negvisact = np.sum(n)
+    poshidact = np.sum(h)/NB
+    posvisact = np.sum(x)/NB
+    neghidact = np.sum(hn)/NB
+    negvisact = np.sum(n)/NB
 
     err = np.sum(((x - n)**2)/NB)
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     if 0==ii%10000 and ii>0:
 
-      print(f"{ii}: err={smerr:.3f} act={smact:.3f}")
+      print(f"{ii}: err={smerr:.3f} act={smact/NH:.3f}")
 
       im_x = np.transpose(x.reshape(28, 28, NB), (0, 2, 1)).reshape(28, 28*NB)
       im_n = np.transpose(n.reshape(28, 28, NB), (0, 2, 1)).reshape(28, 28*NB)
@@ -111,8 +111,8 @@ if __name__ == "__main__":
 
       np_save_img(im, f"im.png")
       np_save_img(im_w, f"w.png")
-      np_save_img(np.transpose(h.reshape(D, D, NB), (2, 0, 1)).reshape(D*NB, D), f"h.png")
-      np_save_img(np.transpose(H.reshape(D, D, NB), (2, 0, 1)).reshape(D*NB, D), f"H.png")
+      np_save_img(np.transpose(h.reshape(D, D, NB), (2, 0, 1)).reshape(D*NB, D), f"h_prob.png")
+      np_save_img(np.transpose(H.reshape(D, D, NB), (2, 0, 1)).reshape(D*NB, D), f"h_state.png")
 
     # adjust w
     dw = momentum * dw + eta*(posprods - negprods)/NB
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     dc = momentum * dc + eta*(posvisact - negvisact)/NB
 
     w = w * (1 - decay) + dw
-    b = b * (1 - decay) + db
-    c = c * (1 - decay) + dc
+    #b = b * (1 - decay) + db
+    #c = c * (1 - decay) + dc
 
     ii += 1
