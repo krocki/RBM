@@ -4,12 +4,12 @@ import matplotlib
 matplotlib.use('Agg')
 
 NX = 784
-NH = 100
+NH = 256
 D = int(np.sqrt(NH))
 
 NB = 32
 sigma = 1e-2
-eta = 1e-3
+eta = 1e-4
 decay = 1e-4
 momentum = .9
 smoothing = 1e-3
@@ -71,17 +71,16 @@ if __name__ == "__main__":
 
     # up
     h = np.dot(w.T, x) + b
-    h = logistic(h)
+    #h = logistic(h)
 
     # down
     r = np.random.rand(NH, NB).astype(np.float32)
-    H = (r < h).astype(np.float32)
+    H = h + r
     n = np.dot(w, H) + c
     n = logistic(n)
 
     # up
     hn = np.dot(w.T, n) + b
-    hn = logistic(hn)
 
     # change w
     posprods = np.dot(x, h.T)
