@@ -4,10 +4,10 @@ import matplotlib
 matplotlib.use('Agg')
 
 NX = 784
-NH = 100
+NH = 64
 D = int(np.sqrt(NH))
 
-NB = 32
+NB = 8
 sigma = 1e-2
 eta = 1e-3
 decay = 1e-4

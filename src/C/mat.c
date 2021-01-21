@@ -111,14 +111,16 @@ int nnz(int n, const float *a) {
   return o;
 }
 
-void sub(int n,
-         float *c,
-         const float *a,
-         const float *b) {
+void mat_sub(mat *o, mat *a, mat *b) {
+  for (int i=0; i<(o->r * o->c); i++) {
+    o->data[i] = a->data[i] - b->data[i];
+  }
+}
 
-  for (int i=0; i<n; i++)
-    c[i] = a[i] - b[i];
-
+void mat_add(mat *o, mat *a, mat *b) {
+  for (int i=0; i<(o->r * o->c); i++) {
+    o->data[i] = a->data[i] + b->data[i];
+  }
 }
 
 float min(int n, const float *a) {
@@ -151,19 +153,37 @@ float binarize(float x) {
   return randf() < x ? 1.f : 0.f;
 }
 
+float square(float x) {
+  return x*x;
+}
+
+float mat_sum(mat *m) {
+
+  float s = 0;
+  const int n = m->r * m->c;
+
+  for (int i=0; i<n; i++)
+    s += m->data[i];
+
+  return s;
+
+}
+
 void mat_zero(mat *m) {
   int n = m->r * m->c;
   memset(m->data, 0, n * sizeof(float));
 }
 
 void mat_randf(mat *m) {
-  for (int i=0; i<(m->r * m->c); i++) {
+  const int n = m->r * m->c;
+  for (int i=0; i<n; i++) {
     m->data[i] = randf();
   }
 }
 
 void mat_randn(mat *m, float mean, float stddev) {
-  for (int i=0; i<(m->r * m->c); i++) {
+  const int n = m->r * m->c;
+  for (int i=0; i<n; i++) {
     m->data[i] = randn(mean, stddev);
   }
 }
