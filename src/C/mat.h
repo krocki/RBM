@@ -15,6 +15,8 @@ float mat_norm(mat *a);
 float mat_sum(mat *a);
 float mat_min(mat *a);
 float mat_max(mat *a);
+// y := a*x + y
+void  mat_axpy(mat *y, float a, mat *x);
 
 void  mmul(mat *c, const mat *restrict a, const mat *restrict b, int, int);
 

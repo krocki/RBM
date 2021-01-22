@@ -30,7 +30,7 @@ HEADERS:=$(wildcard *.h) Makefile
 
 .SUFFIXES:
 
-TARGETS=main
+TARGETS=rbm
 
 all : $(TARGETS)
 

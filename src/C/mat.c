@@ -204,6 +204,18 @@ void mat_apply(mat *out, mat *in, float (*func)(float)) {
 
 }
 
+void mat_axpy(mat *y, float a, mat *x) {
+
+  int n_y = y->r * y->c;
+  int n_x = x->r * x->c;
+  assert(n_x == n_y);
+
+  for (int i=0; i<n_y; i++) {
+    y->data[i] += a * x->data[i];
+  }
+
+}
+
 void dump_arr_f(int n, float *m, const char *fn) {
   FILE *f = fopen(fn, "wb");
   if (!f) return;
@@ -247,7 +259,7 @@ void mmul(
   int K = transA ? a->r : a->c;
 
   float alpha = 1.f;
-  float beta = 1.f;
+  float beta = 0.f;
 
   int lda = transA ? M : K;
   int ldb = transB ? K : N;
