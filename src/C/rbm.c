@@ -10,8 +10,8 @@
 typedef uint8_t u8;
 
 #define NX 784
-#define NH 64
-#define NB 1
+#define NH 256
+#define NB 32
 
 #define DATAPOINTS 60000
 
@@ -47,19 +47,21 @@ int main(int argc, char **argv) {
   mat_zero(&dw0);
 
   mat_randn(&w, 0, 1e-1f);
-  //echo(mat_print(&w));
 
   float loss = 0.0f;
   float smloss = 0.0f;
-  float eta = 1e-2f;
+  float eta = 1e-3f;
   float momentum = 0.9f;
 
   int ii = 0;
 
   do {
 
-    int r = rand() % DATAPOINTS;
-    for (int k=0; k<NX; k++) x.data[k] = (float)(data[r*NX+k]) / 255.0f;
+    // prepare a batch
+    for (int rr=0; rr<NB; rr++) {
+      int r = rand() % DATAPOINTS;
+      for (int k=0; k<NX; k++) x.data[k*NB+rr] = (float)(data[r*NX+k]) / 255.0f;
+    }
 
     /* UP */
     mmul(&h, &w, &x, 1, 0);
@@ -82,9 +84,8 @@ int main(int argc, char **argv) {
 
     // `grads`
     // dw = momentum *dw + eta(posprods - negprods)/NB;
-    //mat_axpy(&dw, 0, momentum, &dw);
-    mat_sub(&dw, &posprods, &negprods);
-    //mat_add(&dw, &dw, &dw0);
+    mat_sub(&dw0, &posprods, &negprods);
+    mat_axpy(&dw, momentum, (1-momentum), &dw0);
     // w += w * eta + dw
     mat_axpy(&w, 1.0f, eta/NB, &dw);
 
@@ -92,9 +93,16 @@ int main(int argc, char **argv) {
     smloss = ii == 0 ? loss : smloss * 0.999f + loss * 0.001f;
 
     if (ii%1000 == 0) {
-      printf("loss=%7.3f, smloss=%7.3f, wnorm=%7.3f, dwnorm=%7.3f\n",
-      loss, smloss, mat_norm(&w), mat_norm(&dw));
-      if (ii%100000 == 0) imshow(&n, 28);
+      printf("ii=%d, loss=%7.3f, smloss=%7.3f, wnorm=%7.3f, dwnorm=%7.3f\n",
+      ii, loss, smloss, mat_norm(&w), mat_norm(&dw));
+      if (ii%10000 == 0) {
+        mat_dump(&x, "x.bin");
+        mat_dump(&n, "n.bin");
+        mat_dump(&h, "h.bin");
+        mat_dump(&H, "H.bin");
+        mat_dump(&w, "w.bin");
+        mat_dump(&dw, "dw.bin");
+      }
     }
 
     ii++;
