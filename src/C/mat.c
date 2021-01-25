@@ -204,14 +204,14 @@ void mat_apply(mat *out, mat *in, float (*func)(float)) {
 
 }
 
-void mat_axpy(mat *y, float a, mat *x) {
+void mat_axpy(mat *y, float a, float b, mat *x) {
 
   int n_y = y->r * y->c;
   int n_x = x->r * x->c;
   assert(n_x == n_y);
 
   for (int i=0; i<n_y; i++) {
-    y->data[i] += a * x->data[i];
+    y->data[i] = a * y->data[i] + b * x->data[i];
   }
 
 }

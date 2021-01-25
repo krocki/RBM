@@ -11,12 +11,13 @@ void  mat_print(mat *m);
 void  mat_dump(mat *b, const char *);
 void  mat_apply(mat *out, mat *in, float (*func)(float));
 void  mat_sub(mat *out, mat *in0, mat *in1);
+void  mat_add(mat *out, mat *in0, mat *in1);
 float mat_norm(mat *a);
 float mat_sum(mat *a);
 float mat_min(mat *a);
 float mat_max(mat *a);
 // y := a*x + y
-void  mat_axpy(mat *y, float a, mat *x);
+void  mat_axpy(mat *y, float b, float a, mat *x);
 
 void  mmul(mat *c, const mat *restrict a, const mat *restrict b, int, int);
 
