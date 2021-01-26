@@ -7,7 +7,7 @@ OPENBLAS=1
 MKLDIR=/opt/intel
 BLASDIR=/opt/OpenBLAS
 
-OPT_LEVEL=-flto -Ofast -fomit-frame-pointer
+OPT_LEVEL=-flto -Ofast -fomit-frame-pointer -mtune=native -march=native -mavx2 -mfma -ffast-math
 
 CC_OPTS=$(OPT_LEVEL) -fPIC -Wall -Wno-unused-variable -Werror -Wfatal-errors
 LD_OPTS=$(OPT_LEVEL) -lm -lc -lpthread

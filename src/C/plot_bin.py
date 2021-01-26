@@ -4,15 +4,16 @@ import matplotlib
 matplotlib.use('Agg')
 
 NX = 784
-NH = 256
+NH = 100
 D = int(np.sqrt(NH))
-NB = 32
+NB = 16
+d = int(np.sqrt(NB))
 
 def np_save_img(arr, fname, cmap='viridis'):
 
   p = plt.imshow(arr, cmap=cmap, interpolation='nearest')
   plt.xticks([]), plt.yticks([])
-  plt.savefig(f'{fname}')
+  plt.savefig(f'{fname}', dpi=300)
   plt.close('all')
 
 def logistic(x):
@@ -28,14 +29,14 @@ def vis_weights(w):
 
 if __name__ == "__main__":
 
-  np.set_printoptions(precision=3)
+  np.set_printoptions(precision=4)
 
   # C-saved files
   x = np.fromfile(open('x.bin'), dtype='float32')
   w = np.fromfile(open('w.bin'), dtype='float32')
   dw = np.fromfile(open('dw.bin'), dtype='float32')
   h = np.fromfile(open('h.bin'), dtype='float32')
-  H = np.fromfile(open('H.bin'), dtype='float32')
+  H = np.fromfile(open('h_.bin'), dtype='float32')
   n = np.fromfile(open('n.bin'), dtype='float32')
 
   x = x.reshape(NX, NB)
@@ -45,9 +46,9 @@ if __name__ == "__main__":
   h = h.reshape(NH, NB)
   H = H.reshape(NH, NB)
 
-  im_x = np.transpose(x.reshape(28, 28, NB), (0, 2, 1)).reshape(28, 28*NB)
-  im_n = np.transpose(n.reshape(28, 28, NB), (0, 2, 1)).reshape(28, 28*NB)
-  im = np.vstack((im_x, im_n))
+  im_x = np.transpose(x.reshape(28, 28, d, d), (3, 0, 2, 1)).reshape(28*d, 28*d)
+  im_n = np.transpose(n.reshape(28, 28, d, d), (3, 0, 2, 1)).reshape(28*d, 28*d)
+  im = np.hstack((im_x, im_n))
   im_w = vis_weights(w)
   im_dw = vis_weights(dw)
 
