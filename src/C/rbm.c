@@ -15,8 +15,8 @@
 typedef uint8_t u8;
 
 #define NX 784
-#define NH 400
-#define NB 32
+#define NH 100
+#define NB 16
 
 #define DATAPOINTS 60000
 
@@ -63,13 +63,14 @@ int main(int argc, char **argv) {
 
   float loss = 0.0f;
   float smloss = 0.0f;
-  float eta = 1e-3f;
-  float momentum = 0.9f;
+  float eta = 1e-4f;
+  float momentum = 0.99f;
   double time_per_iter[NO_TIMERS] = {0};
   //uint64_t t[NO_TIMERS+1] = {0};
-  struct timeval t[NO_TIMERS+1];
+  struct timeval ts, te, t[NO_TIMERS+1];
 
   int ii = 0;
+  gettimeofday(&ts, NULL);
 
   do {
 
@@ -144,21 +145,22 @@ int main(int argc, char **argv) {
     smloss = ii == 0 ? loss : smloss * 0.999f + loss * 0.001f;
 
     if (0<ii && ii%1000 == 0) {
-      printf("ii=%d, loss=%7.3f, smloss=%7.3f, wnorm=%7.3f, dwnorm=%7.3f\n", ii, loss, smloss, mat_norm(&w), mat_norm(&dw));
+      gettimeofday(&te, NULL);
+      printf("%9.3f s, ii=%d, loss=%7.3f, smloss=%7.3f, wnorm=%7.3f, dwnorm=%7.3f\n", get_time_diff(&ts, &te), ii, loss, smloss, mat_norm(&w), mat_norm(&dw));
       if (ii%TIMER_INTERVAL == 0) {
 
         mat_dump(&x, "x.bin");
         mat_dump(&n, "n.bin");
         mat_dump(&h, "h.bin");
-        mat_dump(&H, "H.bin");
+        mat_dump(&H, "h_.bin");
         mat_dump(&w, "w.bin");
         mat_dump(&dw, "dw.bin");
 
-        for (int tt=0; tt<NO_TIMERS; tt++) {
-          printf("t[%d] = %12.6f s\n", tt, time_per_iter[tt] / (double)TIMER_INTERVAL);
-          time_per_iter[tt] = 0.0f;
+        //for (int tt=0; tt<NO_TIMERS; tt++) {
+          //printf("t[%d] = %12.6f s\n", tt, time_per_iter[tt] / (double)TIMER_INTERVAL);
+          //time_per_iter[tt] = 0.0f;
 
-        }
+        //}
       }
     }
 
